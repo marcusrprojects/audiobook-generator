@@ -6,3 +6,5 @@
 *.wav
 /archives
 /.ipynb_checkpoints
+.DS_Store
+*.onnx*
