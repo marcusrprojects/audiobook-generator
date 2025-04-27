@@ -1,0 +1,11 @@
+piper-tts
+piper-phonemize-cross
+onnxruntime
+numpy
+PyPDF2
+pydub
+num2words
+tqdm
+ebooklib
+html2text
+beautifulsoup4
