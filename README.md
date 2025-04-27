@@ -45,7 +45,15 @@ This tool uses **Piper TTS models** (ONNX format) for speech synthesis.
 
 You can download free models from [HuggingFace Piper Voices](https://huggingface.co/rhasspy/piper-voices).
 
-Example for **Joe (American English, medium quality)**:
+### Easy method (recommended)
+
+Run the included script to automatically download all recommended voices:
+
+```bash
+bash download_voices.sh
+```
+
+### Manual method (example for Joe)
 
 ```bash
 mkdir -p voices/en_US/joe-medium
