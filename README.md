@@ -18,24 +18,46 @@ Everything runs **locally** — no internet connection or server required.
 
 ## 🛠 Installation
 
-1. Clone the repository:
+Follow these steps to set up the project and its dependencies.
 
-```bash
-git clone https://github.com/marcusrprojects/audiobook-generator.git
-cd audiobook-generator
-```
+1. **Clone the repository**:
 
-2. Install the package:
+    ```bash
+    git clone https://github.com/marcusrprojects/audiobook-generator.git
+    cd audiobook-generator
+    ```
 
-```bash
-pip install .
-```
+2. **Create and activate a virtual environment** (recommended):
 
-Or if you prefer:
+    ```bash
+    # macOS/Linux
+    python3 -m venv .venv
+    source .venv/bin/activate
 
-```bash
-pip install -r requirements.txt
-```
+    # Windows (PowerShell)
+    .venv\Scripts\Activate.ps1
+    ```
+
+3. **Install Piper TTS packages** (manual install to satisfy dependencies):
+
+    ```bash
+    pip install piper-tts --no-deps
+    pip install piper-phonemize-cross
+    ```
+
+4. **Install the remaining dependencies**:
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+5. **Download voice models**:
+
+    ```bash
+    bash download_voices.sh
+    ```
+
+> **Note:** `requirements.txt` includes all non-Piper dependencies. The two Piper packages must be installed manually due to naming differences.
 
 ---
 
@@ -43,11 +65,11 @@ pip install -r requirements.txt
 
 This tool uses **Piper TTS models** (ONNX format) for speech synthesis.
 
-You can download free models from [HuggingFace Piper Voices](https://huggingface.co/rhasspy/piper-voices).
+You can download free voice models from [HuggingFace Piper Voices](https://huggingface.co/rhasspy/piper-voices).
 
 ### Easy method (recommended)
 
-Run the included script to automatically download all recommended voices:
+Run the included script:
 
 ```bash
 bash download_voices.sh
@@ -67,39 +89,35 @@ cd ../../../..
 
 Recommended Voices:
 
-| Voice | Path | Notes |
-|:------|:-----|:------|
-| **LibriTTS R (US, medium)** | `voices/en_US/libritts_r-medium/` | Neutral American narrator |
-| **Joe (US, medium)** | `voices/en_US/joe-medium/` | Clear American male |
-| **Cori (UK, high quality)** | `voices/en_GB/cori-high/` | High-quality British female |
-| **Jenny Dioco (UK, medium)** | `voices/en_GB/jenny_dioco-medium/` | Warm British voice |
+| Voice                          | Path                                              | Notes                           |
+|:-------------------------------|:--------------------------------------------------|:--------------------------------|
+| **LibriTTS R (US, medium)**    | `voices/en_US/libritts_r-medium/`                 | Neutral American narrator       |
+| **Joe (US, medium)**           | `voices/en_US/joe-medium/`                        | Clear American male             |
+| **Cori (UK, high quality)**    | `voices/en_GB/cori-high/`                         | High-quality British female     |
+| **Jenny Dioco (UK, medium)**   | `voices/en_GB/jenny_dioco-medium/`                | Warm British voice              |
 
 ---
 
 ## 🌟 Usage
 
-### Basic usage (interactive voice selection)
+After installation, you can generate an audiobook with:
 
 ```bash
 audiobook-gen input_file.pdf output_file.mp3
 ```
 
-You will be prompted to select a voice model if you don't specify one.
-
----
-
-### Advanced usage (specify model manually)
+By default, the **LibriTTS R (US, medium)** voice is used. To specify a different model:
 
 ```bash
-audiobook-gen input_file.epub output_file.wav --model voices/en_US/joe-medium/en_US-joe-medium.onnx
+audiobook-gen input_file.epub output_file.wav \
+  --model voices/en_GB/cori-high/en_GB-cori-high.onnx
 ```
 
----
-
-### Adding metadata (for MP3s)
+Add metadata (MP3 only):
 
 ```bash
-audiobook-gen book.txt audiobook.mp3 --title "My Audiobook" --artist "Author Name"
+audiobook-gen book.txt audiobook.mp3 \
+  --title "My Audiobook" --artist "Author Name"
 ```
 
 ---
@@ -134,7 +152,8 @@ audiobook-gen my_book.pdf my_audiobook.mp3
 - Python 3.8 or higher
 - ONNX Runtime
 - Piper TTS models
-- Listed in [`requirements.txt`](requirements.txt)
+- Listed in [`requirements.txt`](requirements.txt) (non-Piper dependencies)
+- Manual install for `piper-tts` and `piper-phonemize-cross`
 
 ---
 
@@ -160,7 +179,6 @@ MIT License — free for personal and commercial use.
 
 - Batch conversion
 - Desktop GUI version (Tauri or Electron)
-- Streaming audiobook generation
 - Additional language support
 
 ---
