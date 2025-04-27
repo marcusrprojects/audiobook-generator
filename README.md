@@ -1,6 +1,6 @@
 # 📖 Audiobook Generator
 
-Turn any **PDF**, **EPUB**, or **TXT** file into a professional-quality **audiobook** using **Piper TTS**.  
+Turn any **PDF**, **EPUB**, or **TXT** file into an **audiobook** using **Piper TTS**.  
 Everything runs **locally** — no internet connection or server required.
 
 ---
