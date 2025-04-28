@@ -1,5 +1,8 @@
 # 📖 Audiobook Generator
 
+[![Latest Release](https://img.shields.io/github/v/release/marcusrprojects/audiobook-generator?label=release)](https://github.com/marcusrprojects/audiobook-generator/releases)
+[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
+
 Turn any **PDF**, **EPUB**, or **TXT** file into an **audiobook** using **Piper TTS**.  
 Everything runs **locally** — no internet connection or server required.
 
@@ -166,12 +169,6 @@ Later, you can bundle it into a single executable using [PyInstaller](https://py
 pip install pyinstaller
 pyinstaller --onefile audiobook_generator.py
 ```
-
----
-
-## 📜 License
-
-MIT License — free for personal and commercial use.
 
 ---
 
