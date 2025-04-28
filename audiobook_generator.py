@@ -5,9 +5,12 @@ audiobook_generator.py
 Generate a natural-sounding audiobook from PDF, EPUB, or TXT using Piper TTS.
 """
 
+__version__ = "0.1.0"
+
 import sys
 import re
 import wave
+import logging
 from argparse import ArgumentParser, ArgumentTypeError
 from pathlib import Path
 from typing import List, Optional, Dict, Tuple, TypedDict
@@ -18,16 +21,15 @@ from PyPDF2 import PdfReader
 from pydub import AudioSegment
 from tqdm import tqdm
 
+
 class Fragment(TypedDict):
     text: str
     end_sentence: bool
     end_paragraph: bool
 
-# --------------------- Configuration ---------------------
-# Default Piper model path
-DEFAULT_MODEL = Path('voices/en_US/libritts_r-medium/en_US-libritts_r-medium.onnx')
 
-# Available voices for --list-models
+# --------------------- Configuration ---------------------
+DEFAULT_MODEL = Path('voices/en_US/libritts_r-medium/en_US-libritts_r-medium.onnx')
 AVAILABLE_VOICES: List[Tuple[str, Path]] = [
     ('LibriTTS R (American, medium)', Path('voices/en_US/libritts_r-medium/en_US-libritts_r-medium.onnx')),
     ('Joe (American, medium)',        Path('voices/en_US/joe-medium/en_US-joe-medium.onnx')),
@@ -40,11 +42,11 @@ PAUSE_COMMA_MS = 200   # pause after commas
 PAUSE_SENT_MS  = 500   # pause after sentences
 PAUSE_PARA_MS  = 1000  # pause between paragraphs
 
-# Temporary WAV file (overwritten each fragment)
+# Temporary WAV file (overwritten per fragment)
 TEMP_WAV = Path('_temp.wav')
 
 
-# --------------------- Helper Functions ---------------------
+# --------------------- Utility Functions ---------------------
 
 def normalize_text(text: str) -> str:
     """
@@ -62,11 +64,11 @@ def normalize_text(text: str) -> str:
 
 def existing_file(path: str) -> Path:
     """
-    Argparse type for validating that a file exists.
+    Argparse type: validate that a given file exists.
     """
     p = Path(path)
     if not p.is_file():
-        raise ArgumentTypeError(f'File not found: {path}')
+        raise ArgumentTypeError(f"File not found: {path}")
     return p
 
 
@@ -83,7 +85,7 @@ def load_paragraphs(path: Path) -> List[str]:
         from html2text import html2text
 
         book = epub.read_epub(str(path))
-        parts = []
+        parts: List[str] = []
         for item in book.get_items_of_type(ebooklib.ITEM_DOCUMENT):
             html = item.get_content().decode('utf8')
             parts.append(html2text(html))
@@ -95,6 +97,8 @@ def load_paragraphs(path: Path) -> List[str]:
     return [p.strip() for p in raw.split('\n\n') if p.strip()]
 
 
+# --------------------- Core Logic ---------------------
+
 def synthesize_fragments(
     paragraphs: List[str],
     model_path: Path,
@@ -102,21 +106,16 @@ def synthesize_fragments(
     metadata: Optional[Dict[str, str]] = None
 ) -> None:
     """
-    Synthesize paragraphs to an audio file (wav or mp3) with smooth progress
-    and natural pauses after commas, sentences, and paragraphs.
+    Synthesize text fragments into an audiobook with natural pauses
+    and a smooth tqdm progress bar.
     """
-    # 1. Load model
-    print("🔄 Loading Piper TTS model...", end="", flush=True)
+    logging.info("🔄 Loading Piper TTS model...")
     voice = PiperVoice.load(str(model_path))
     sr = voice.config.sample_rate
-    print(" done.")
 
-    # 2. Build a flat list of all fragments with boundary flags
     fragments: List[Fragment] = []
-
     for para in paragraphs:
         norm = normalize_text(para)
-        # split into sentences
         sentences = re.split(r'(?<=[.?!])\s+', norm)
         for si, sent in enumerate(sentences):
             sent = sent.strip()
@@ -131,20 +130,17 @@ def synthesize_fragments(
                     'end_paragraph': (si == len(sentences)-1 and pi == len(parts)-1)
                 })
 
-    total = len(fragments)
-    if total == 0:
-        raise RuntimeError("No text fragments found to synthesize.")
+    if not fragments:
+        logging.error("No text fragments found to synthesize.")
+        sys.exit(1)
 
-    # 3. Prepare silence segments
+    # Pre-generate silence
     short_pause = AudioSegment.silent(PAUSE_COMMA_MS)
     sent_pause  = AudioSegment.silent(PAUSE_SENT_MS)
     para_pause  = AudioSegment.silent(PAUSE_PARA_MS)
 
     audiobook = AudioSegment.empty()
-
-    # 4. Synthesize with single progress bar
     for frag in tqdm(fragments, desc="Synthesizing", unit="frag"):
-        # generate the WAV for this fragment
         with wave.open(str(TEMP_WAV), 'wb') as wf:
             wf.setnchannels(1)
             wf.setsampwidth(2)
@@ -158,17 +154,13 @@ def synthesize_fragments(
             )
         audiobook += AudioSegment.from_wav(str(TEMP_WAV))
 
-        # comma-pause if not end of sentence
         if not frag['end_sentence']:
             audiobook += short_pause
         else:
-            # sentence-pause
             audiobook += sent_pause
-            # paragraph-pause if end of paragraph
             if frag['end_paragraph']:
                 audiobook += para_pause
 
-    # 5. Cleanup and export
     if TEMP_WAV.exists():
         TEMP_WAV.unlink()
 
@@ -180,9 +172,20 @@ def synthesize_fragments(
         audiobook.export(str(output_path), format='wav')
 
 
+def list_models() -> None:
+    """Print bundled voice model names and paths."""
+    for name, path in AVAILABLE_VOICES:
+        logging.info(f"{name}: {path}")
+
+
 def main() -> None:
+    logging.basicConfig(format='%(message)s', level=logging.INFO)
     parser = ArgumentParser(
         description='Generate an audiobook from PDF/EPUB/TXT via Piper TTS'
+    )
+    parser.add_argument(
+        '--version', action='version', version=__version__,
+        help='Show program version and exit'
     )
     parser.add_argument(
         'input', type=existing_file,
@@ -194,7 +197,7 @@ def main() -> None:
     )
     parser.add_argument(
         '-m', '--model', type=existing_file,
-        default=str(DEFAULT_MODEL),
+        default=DEFAULT_MODEL,
         help='Path to Piper ONNX model file'
     )
     parser.add_argument(
@@ -207,14 +210,13 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.list_models:
-        for name, path in AVAILABLE_VOICES:
-            print(f'{name}: {path}')
+        list_models()
         sys.exit(0)
 
-    model_path = args.model
     paragraphs = load_paragraphs(args.input)
     if not paragraphs:
-        sys.exit('Error: No text extracted from input.')
+        logging.error('Error: No text extracted from input.')
+        sys.exit(1)
 
     metadata: Dict[str, str] = {}
     if args.title:
@@ -222,8 +224,13 @@ def main() -> None:
     if args.artist:
         metadata['artist'] = args.artist
 
-    synthesize_fragments(paragraphs, Path(model_path), Path(args.output), metadata or None)
-    print(f'Audiobook written to {args.output}')
+    synthesize_fragments(
+        paragraphs,
+        args.model,
+        args.output,
+        metadata or None
+    )
+    logging.info(f'Audiobook written to {args.output}')
 
 
 if __name__ == '__main__':
