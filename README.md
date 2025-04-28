@@ -172,12 +172,6 @@ pyinstaller --onefile audiobook_generator.py
 
 ---
 
-## 📜 License
-
-MIT License — free for personal and commercial use.
-
----
-
 ## ✨ Future Plans
 
 - More granular loading screen %s.
