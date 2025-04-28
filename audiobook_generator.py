@@ -10,13 +10,18 @@ import re
 import wave
 from argparse import ArgumentParser, ArgumentTypeError
 from pathlib import Path
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional, Dict, Tuple, TypedDict
 
 from num2words import num2words
 from piper.voice import PiperVoice
 from PyPDF2 import PdfReader
 from pydub import AudioSegment
 from tqdm import tqdm
+
+class Fragment(TypedDict):
+    text: str
+    end_sentence: bool
+    end_paragraph: bool
 
 # --------------------- Configuration ---------------------
 # Default Piper model path
@@ -97,46 +102,73 @@ def synthesize_fragments(
     metadata: Optional[Dict[str, str]] = None
 ) -> None:
     """
-    Synthesize paragraphs to an audio file (wav or mp3) with natural pauses.
+    Synthesize paragraphs to an audio file (wav or mp3) with smooth progress
+    and natural pauses after commas, sentences, and paragraphs.
     """
+    # 1. Load model
+    print("🔄 Loading Piper TTS model...", end="", flush=True)
     voice = PiperVoice.load(str(model_path))
     sr = voice.config.sample_rate
+    print(" done.")
 
+    # 2. Build a flat list of all fragments with boundary flags
+    fragments: List[Fragment] = []
+
+    for para in paragraphs:
+        norm = normalize_text(para)
+        # split into sentences
+        sentences = re.split(r'(?<=[.?!])\s+', norm)
+        for si, sent in enumerate(sentences):
+            sent = sent.strip()
+            if not sent:
+                continue
+            core = sent.rstrip('.?!')
+            parts = [p.strip() for p in core.split(',') if p.strip()]
+            for pi, part in enumerate(parts):
+                fragments.append({
+                    'text': part,
+                    'end_sentence': (pi == len(parts)-1),
+                    'end_paragraph': (si == len(sentences)-1 and pi == len(parts)-1)
+                })
+
+    total = len(fragments)
+    if total == 0:
+        raise RuntimeError("No text fragments found to synthesize.")
+
+    # 3. Prepare silence segments
     short_pause = AudioSegment.silent(PAUSE_COMMA_MS)
     sent_pause  = AudioSegment.silent(PAUSE_SENT_MS)
     para_pause  = AudioSegment.silent(PAUSE_PARA_MS)
 
     audiobook = AudioSegment.empty()
-    for para in tqdm(paragraphs, desc='Paragraphs'):
-        text = normalize_text(para)
-        sentences = re.split(r'(?<=[.?!])\s+', text)
-        for sent in sentences:
-            sent = sent.strip()
-            if not sent:
-                continue
-            core = sent.rstrip('.?!')
-            fragments = core.split(',')
-            for idx, frag in enumerate(fragments):
-                frag = frag.strip()
-                if not frag:
-                    continue
-                with wave.open(str(TEMP_WAV), 'wb') as wf:
-                    wf.setnchannels(1)
-                    wf.setsampwidth(2)
-                    wf.setframerate(sr)
-                    voice.synthesize(
-                        frag, wf,
-                        length_scale=1.0,
-                        noise_scale=0.6,
-                        noise_w=0.8,
-                        sentence_silence=0.0
-                    )
-                audiobook += AudioSegment.from_wav(str(TEMP_WAV))
-                if idx < len(fragments) - 1:
-                    audiobook += short_pause
-            audiobook += sent_pause
-        audiobook += para_pause
 
+    # 4. Synthesize with single progress bar
+    for frag in tqdm(fragments, desc="Synthesizing", unit="frag"):
+        # generate the WAV for this fragment
+        with wave.open(str(TEMP_WAV), 'wb') as wf:
+            wf.setnchannels(1)
+            wf.setsampwidth(2)
+            wf.setframerate(sr)
+            voice.synthesize(
+                frag['text'], wf,
+                length_scale=1.0,
+                noise_scale=0.6,
+                noise_w=0.8,
+                sentence_silence=0.0
+            )
+        audiobook += AudioSegment.from_wav(str(TEMP_WAV))
+
+        # comma-pause if not end of sentence
+        if not frag['end_sentence']:
+            audiobook += short_pause
+        else:
+            # sentence-pause
+            audiobook += sent_pause
+            # paragraph-pause if end of paragraph
+            if frag['end_paragraph']:
+                audiobook += para_pause
+
+    # 5. Cleanup and export
     if TEMP_WAV.exists():
         TEMP_WAV.unlink()
 
