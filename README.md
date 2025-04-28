@@ -174,7 +174,6 @@ pyinstaller --onefile audiobook_generator.py
 
 ## ✨ Future Plans
 
-- More granular loading screen %s.
 - Batch conversion
 - Desktop GUI version (Tauri or Electron)
 - Additional language support
