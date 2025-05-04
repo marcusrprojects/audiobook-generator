@@ -14,7 +14,7 @@ For those familiar with Python development:
 
 ```bash
 # 1. Clone the repository
-git clone [https://github.com/marcusrprojects/audiobook-generator.git](https://github.com/marcusrprojects/audiobook-generator.git)
+git clone https://github.com/marcusrprojects/audiobook-generator.git
 cd audiobook-generator
 
 # 2. Create & activate virtual environment (macOS/Linux example)
@@ -32,9 +32,9 @@ bash download_voices.sh
 
 # 6. Generate an audiobook!
 audiobook-gen path/to/your_book.epub path/to/output/audio.mp3
-
-<sub>Windows Users: Use PowerShell/CMD for venv activation (see detailed steps below). For download_voices.sh, use WSL2, Git Bash, or download models manually.</sub>
 ```
+
+<sub>Windows Users: Use PowerShell/CMD for venv activation (see detailed steps below). For `download_voices.sh`, use WSL2, Git Bash, or download models manually.</sub>
 
 ---
 
