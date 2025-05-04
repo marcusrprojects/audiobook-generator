@@ -1,10 +1,38 @@
 # 📖 Audiobook Generator
 
-[![Latest Release](https://img.shields.io/github/v/release/marcusrprojects/audiobook-generator?label=release)](https://github.com/marcusrprojects/audiobook-generator/releases)
+[![Latest Release](https://img.shields.io/github/v/release/youruser/audiobook-generator?label=release)](https://github.com/youruser/audiobook-generator/releases)
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) Turn any **PDF**, **EPUB**, or **TXT** file into a natural-sounding **audiobook** using **Piper TTS**.
+Everything runs **locally** — no internet connection or server required after setup.
 
-Turn any **PDF**, **EPUB**, or **TXT** file into an **audiobook** using **Piper TTS**.  
-Everything runs **locally** — no internet connection or server required.
+---
+
+## 🚀 TL;DR Quick Start
+
+For those familiar with Python development:
+
+```bash
+# 1. Clone the repository
+git clone [https://github.com/youruser/audiobook-generator.git](https://github.com/marcusrprojects/audiobook-generator.git)
+cd audiobook-generator
+
+# 2. Create & activate virtual environment (macOS/Linux example)
+python3 -m venv .venv && source .venv/bin/activate
+
+# 3. Install Piper TTS packages manually first
+pip install piper-tts --no-deps
+pip install piper-phonemize-cross
+
+# 4. Install the package and its other dependencies
+pip install . # Installs audiobook-generator and requirements.txt deps
+
+# 5. Download default English voice models (requires bash/curl)
+bash download_voices.sh
+
+# 6. Generate an audiobook!
+audiobook-gen path/to/your_book.epub path/to/output/audio.mp3
+
+<sub>Windows Users: Use PowerShell/CMD for venv activation (see detailed steps below). For download_voices.sh, use WSL2, Git Bash, or download models manually.</sub>
 
 ---
 
@@ -17,6 +45,7 @@ Everything runs **locally** — no internet connection or server required.
 - 🎵 Outputs standard **WAV** or **MP3** files
 - 🏷️ Add metadata (title, artist) to MP3 files
 - 💻 100% offline — no server, no data collection
+- ⚙️ Simple command-line interface
 
 ---
 
@@ -34,15 +63,21 @@ Follow these steps to set up the project and its dependencies.
 2. **Create and activate a virtual environment** (recommended):
 
     ```bash
-    # macOS/Linux
+    # macOS / Linux
     python3 -m venv .venv
     source .venv/bin/activate
 
+    # Windows (Command Prompt)
+    python -m venv .venv
+    .venv\Scripts\activate.bat
+
     # Windows (PowerShell)
+    python -m venv .venv
     .venv\Scripts\Activate.ps1
     ```
 
-3. **Install Piper TTS packages** (manual install to satisfy dependencies):
+3. **Install Piper TTS Packages Manually**:
+  *These specific packages often need manual installation first due to their dependencies or naming conventions.*
 
     ```bash
     pip install piper-tts --no-deps
@@ -56,17 +91,20 @@ Follow these steps to set up the project and its dependencies.
     ```
 
 5. **Install the `audiobook-generator` package**:
-    *This step makes the `audiobook-gen` command available.*
+    *This step reads `setup.py` and makes the `audiobook-gen` command available in your active environment.*
 
     ```bash
     pip install .
     ```
 
 6. **Download voice models**:
+  *See the "Downloading Voice Models" section below for details. The easiest way is using the provided script (requires `bash` and `curl`):*
 
     ```bash
     bash download_voices.sh
     ```
+  
+  *(If `bash` is unavailable, see manual download instructions below).*
 
 > **Note:** `requirements.txt` includes all non-Piper dependencies. The two Piper packages must be installed manually due to naming differences.
 
@@ -118,6 +156,7 @@ audiobook-gen input_file.pdf output_file.mp3
 ```
 
 By default, the **LibriTTS R (US, medium)** voice is used. To specify a different model:
+*(Use the path to the desired `.onnx` model file)*
 
 ```bash
 audiobook-gen input_file.epub output_file.wav \
@@ -138,13 +177,14 @@ audiobook-gen book.txt audiobook.mp3 \
 ```
 
 List available bundled voice models:
-(Lists voices defined in the script's AVAILABLE_VOICES list)
+*(Lists voices defined in the script's `AVAILABLE_VOICES` list)*
 
 ```bash
 audiobook-gen --list-models
 ```
 
-Show help message with all options:
+Show help message:
+*(Displays all available command-line options)*
 
 ```bash
 audiobook-gen --help
@@ -198,7 +238,7 @@ pip install pyinstaller
 pyinstaller --onefile audiobook_generator.py
 ```
 
-*This process can take a significant amount of time and requires substantial disk space. It analyzes dependencies and bundles everything. The final executable will be placed inside a new `dist` folder.*
+*This process can take a significant amount of time and requires substantial disk space. It analyzes dependencies and bundles everything. The final executable will be placed inside a new `dist/` folder.*
 
 **Running the Standalone Executable:**
 
@@ -218,17 +258,6 @@ cd dist
 
 ---
 
-## 📦 Packaging Notes
-
-This project is fully pip-installable.
-
-```bash
-pip install pyinstaller
-pyinstaller --onefile audiobook_generator.py
-```
-
----
-
 ## ✨ Future Plans
 
 - Batch conversion
@@ -243,4 +272,4 @@ Open an issue on [GitHub](https://github.com/marcusrprojects/audiobook-generator
 
 ---
 
-## 🏁 Let's turn your books into audiobooks
+## 🏁 Let's turn your books into audiobooks!
