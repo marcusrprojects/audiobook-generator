@@ -34,6 +34,7 @@ bash download_voices.sh
 audiobook-gen path/to/your_book.epub path/to/output/audio.mp3
 
 <sub>Windows Users: Use PowerShell/CMD for venv activation (see detailed steps below). For download_voices.sh, use WSL2, Git Bash, or download models manually.</sub>
+```
 
 ---
 
