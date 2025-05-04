@@ -1,6 +1,6 @@
 # 📖 Audiobook Generator
 
-[![Latest Release](https://img.shields.io/github/v/release/youruser/audiobook-generator?label=release)](https://github.com/youruser/audiobook-generator/releases)
+[![Latest Release](https://img.shields.io/github/v/release/marcusrprojects/audiobook-generator?label=release)](https://github.com/marcusrprojects/audiobook-generator/releases)
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) Turn any **PDF**, **EPUB**, or **TXT** file into a natural-sounding **audiobook** using **Piper TTS**.
 Everything runs **locally** — no internet connection or server required after setup.
@@ -13,7 +13,7 @@ For those familiar with Python development:
 
 ```bash
 # 1. Clone the repository
-git clone [https://github.com/youruser/audiobook-generator.git](https://github.com/marcusrprojects/audiobook-generator.git)
+git clone [https://github.com/marcusrprojects/audiobook-generator.git](https://github.com/marcusrprojects/audiobook-generator.git)
 cd audiobook-generator
 
 # 2. Create & activate virtual environment (macOS/Linux example)
