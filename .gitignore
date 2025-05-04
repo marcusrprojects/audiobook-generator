@@ -9,3 +9,7 @@
 .DS_Store
 *.onnx*
 /.venv
+/audiobook_generator.egg-info
+/build
+/dist
+*.spec
