@@ -14,7 +14,8 @@ Everything runs **locally** — no internet connection or server required.
 - 🗣️ Multiple **Piper TTS** voices (American and British English)
 - ⏸️ Smart pauses after sentences, commas, and paragraphs
 - 🛠️ Text normalization (expand numbers, abbreviations)
-- 🎵 Outputs **WAV** or **MP3** files with optional metadata (title, artist)
+- 🎵 Outputs standard **WAV** or **MP3** files
+- 🏷️ Add metadata (title, artist) to MP3 files
 - 💻 100% offline — no server, no data collection
 
 ---
@@ -54,7 +55,14 @@ Follow these steps to set up the project and its dependencies.
     pip install -r requirements.txt
     ```
 
-5. **Download voice models**:
+5. **Install the `audiobook-generator` package**:
+    *This step makes the `audiobook-gen` command available.*
+
+    ```bash
+    pip install .
+    ```
+
+6. **Download voice models**:
 
     ```bash
     bash download_voices.sh
@@ -101,9 +109,9 @@ Recommended Voices:
 
 ---
 
-## 🌟 Usage
+## 🌟 Usage (After Installation via `pip install .`)
 
-After installation, you can generate an audiobook with:
+Ensure your virtual environment is active (`source .venv/bin/activate` or `.venv\Scripts\activate`). You can then use the audiobook-gen command:
 
 ```bash
 audiobook-gen input_file.pdf output_file.mp3
@@ -116,6 +124,12 @@ audiobook-gen input_file.epub output_file.wav \
   --model voices/en_GB/cori-high/en_GB-cori-high.onnx
 ```
 
+Specify input format (EPUB) and output format (WAV):
+
+```bash
+audiobook-gen path/to/novel.epub final_audio.wav
+```
+
 Add metadata (MP3 only):
 
 ```bash
@@ -123,12 +137,17 @@ audiobook-gen book.txt audiobook.mp3 \
   --title "My Audiobook" --artist "Author Name"
 ```
 
----
-
-## ⚡ Example
+List available bundled voice models:
+(Lists voices defined in the script's AVAILABLE_VOICES list)
 
 ```bash
-audiobook-gen my_book.pdf my_audiobook.mp3
+audiobook-gen --list-models
+```
+
+Show help message with all options:
+
+```bash
+audiobook-gen --help
 ```
 
 ---
@@ -137,7 +156,7 @@ audiobook-gen my_book.pdf my_audiobook.mp3
 
 - `.pdf` (scanned PDFs with selectable text)
 - `.epub` (standard e-book format)
-- `.txt` (plain text files)
+- `.txt` (plain text files, UTF-8 encoding preferred)
 
 ---
 
@@ -160,10 +179,48 @@ audiobook-gen my_book.pdf my_audiobook.mp3
 
 ---
 
+## 📦 Creating a Standalone Executable (Optional Alternative)
+
+If you want to distribute this tool to users who might not have Python installed, you can bundle it into a single executable file using [PyInstaller](https://pyinstaller.org/). This is typically done by the developer for distribution.
+
+**Steps to Create the Executable:**
+
+1. Make sure you have followed the Installation steps 1-4 (you need the dependencies installed).
+2. Install PyInstaller in your virtual environment:
+
+```bash
+pip install pyinstaller
+```
+
+3. Run PyInstaller from the project's root directory (`audiobook-generator/`):
+
+```bash
+pyinstaller --onefile audiobook_generator.py
+```
+
+*This process can take a significant amount of time and requires substantial disk space. It analyzes dependencies and bundles everything. The final executable will be placed inside a new `dist` folder.*
+
+**Running the Standalone Executable:**
+
+Once built, the executable in the `dist` folder can be run directly without needing Python or the virtual environment.
+
+```bash
+# Example on macOS/Linux:
+cd dist
+./audiobook_generator ../path/to/book.pdf output.mp3 --model ../voices/en_US/joe-medium/en_US-joe-medium.onnx
+
+# Example on Windows:
+cd dist
+.\audiobook_generator.exe ..\path\to\book.pdf output.mp3 --model ..\voices\en_US\joe-medium\en_US-joe-medium.onnx
+```
+
+*Note: Paths to input files and models are relative to where you run the command.*
+
+---
+
 ## 📦 Packaging Notes
 
-This project is fully pip-installable.  
-Later, you can bundle it into a single executable using [PyInstaller](https://pyinstaller.org/):
+This project is fully pip-installable.
 
 ```bash
 pip install pyinstaller
@@ -186,4 +243,4 @@ Open an issue on [GitHub](https://github.com/marcusrprojects/audiobook-generator
 
 ---
 
-## 🏁 Let's turn your books into beautiful audiobooks
+## 🏁 Let's turn your books into audiobooks
